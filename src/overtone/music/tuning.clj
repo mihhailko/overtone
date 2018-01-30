@@ -25,3 +25,5 @@
 
 ;; 24-tone equal temperament --> Arabic music
 ;; ratio = (Math/pow 2 (/ 1 24)) => 1.029302236643492
+
+
