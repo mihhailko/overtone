@@ -45,12 +45,11 @@
 (def N0 (monotron 40 0.8 1 0.0 2.5 350.0 800.0 3.0))
 
 ;; edit & C-x C-e on any these to play around
-(ctl N0 :note   80)               ;; midi note value: 0 to 127
-(ctl N0 :volume 0.7)              ;; gain of the output: 0.0 to 1.0
+(ctl N0 :note   90)               ;; midi note value: 0 to 127
+(ctl N0 :volume 0.8)              ;; gain of the output: 0.0 to 1.0
 (ctl N0 :mod_pitch_not_cutoff 0)  ;; use 0 or 1 only to select LFO pitch or cutoff modification
 (ctl N0 :pitch  10.0)             ;; this + note is frequency of the VCO
 (ctl N0 :rate   1.5)              ;; frequency of the LFO
-(ctl N0 :int    800.0)           ;; intensity of the LFO
 (ctl N0 :cutoff 600.0)           ;; cutoff frequency of the VCF
 (ctl N0 :peak   0.5)              ;; VCF peak control (resonance) 0.0 to 4.0
 

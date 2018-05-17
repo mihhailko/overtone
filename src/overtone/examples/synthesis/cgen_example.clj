@@ -36,11 +36,13 @@
  (let [freq (midicps (lag note 0.25))
        bass (apply + (saw (* freq [0.99 1.01])))
        bass (wobble bass wobble-factor)
-       kick (kick-drum bpm :pattern [1 0 0 0 0 0 1 0 1 0 0 1 0 0 0 0])
+       kick (kick-drum bpm :pattern [1 0 0 0 0 0 1 0 1 1 0 0 1 0 0 0 0])
        snare (snare-drum bpm)]
 
    (clip2 (+ bass kick snare) 1)))
 
 ;;(dubstep)
-;;(ctl dubstep :wobble-factor 3)
+
+;;(ctl dubstep :wobble-factor 2)
+
 ;;(stop)

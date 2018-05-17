@@ -52,6 +52,7 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-native "0.9.5"]
+                 [seesaw "1.4.5"]
                  [overtone/at-at "1.2.0"]
                  [overtone/osc-clj "0.9.0"]
                  [overtone/byte-spec "0.3.1"]
