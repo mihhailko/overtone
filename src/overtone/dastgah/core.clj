@@ -40,8 +40,8 @@
 
 (def f (make-frame))
 
-(def freq-opts {:q 100 :w 200 :e 300 :r 400 :t 500 :y 600
-                :a 130 :s 220 :d 340 :f 430 :g 580 :h 620})
+(def freq-opts {:q 100 :w 300 :e 400 :r 500 :t 700 :y 800
+                :a 200 :s 300 :d 500 :f 700 :g 900 :h 1000})
 
 (d/definst broad-synth [freq (:freq @d/state)] (d/saw freq))
 
@@ -96,6 +96,7 @@
 
 (def state (atom {:running? true}))
 
+(apply max @samples)
 
 (defn stuff [samples times]
   (future
