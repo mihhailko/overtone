@@ -1,64 +1,99 @@
 (ns overtone.dastgah.sampler)
 
-(def sampler (atom {:start-time nil}))
+(import '(javax.swing JFrame JLabel JTextField JButton)
+        '(java.awt.event ActionListener)
+        '(java.awt GridLayout))
 
-(defn start-time [] (swap! sampler assoc-in [:start-time] (.(new java.util.Date) (getTime))))
+(def sampler (atom {:interval nil
+                    :samples []
+                    :running false}))
 
-(def steps (atom [1 2 3 4 5]))
+(defn add-sample [smp] (swap! sampler update-in [:samples] conj smp))
 
-(defn next-step [] (reset! steps (take 5 (rest (cycle (deref steps))))))
+(defn rest-and-vec [sth] (-> sth rest vec))
 
-(defn next-when-time-ends [] (if (> (- (. (new java.util.Date) (getTime)) 1000) (:start-time @sampler))
-                    (do (next-step) (start-time))
-                    nil))
+(defn del-sample [] (swap! sampler update-in [:samples] #(rest-and-vec %)))
 
-(defn systime [] (System/currentTimeMillis))
+(defn bck [rts]
+  (let [ratas (rts @sampler)
+        butlast-of (butlast ratas)
+        last-of (last ratas)
+        updte (conj butlast-of last-of)]
+    (swap! sampler assoc rts (vec updte))))
 
-(defn time-diff [tme] (- (systime) tme))
+(defn fwd [rts]
+  (let [ratas (rts @sampler)
+        rest-of (vec (rest ratas))
+        first-of (first ratas)
+        updte (conj rest-of first-of)]
+    (swap! sampler assoc rts updte)))
 
-(def intervals [2000 4000 6000 8000])
+(defn fwd-and-get-first [] (do
+                             (fwd :samples)
+                             (first (:samples @sampler))))
 
-(:start-time @sampler)
+(defn bck-and-get-first [] (do
+                             (bck :samples)
+                             (first (:samples @sampler))))
 
-(start-time)
-
-(defn playing? [] (some #(= false %) (map #(>= (time-diff (:start-time @sampler)) %) intervals)))
-
-(playing?)
-
-
-
-(def clock (atom {:updated false
-                  :data nil}))
-
-(defn run-clock []
+(defn del-and-get-first []
   (do
-    (swap! clock assoc :running? true)
-    (println "clock active")))
+    (del-sample)
+    (first (:samples @sampler))))
 
-(deref clock)
+(defn ui []
+  (let [frame (JFrame. "Simple Sampler")
+        first-sample-label (JLabel. (first (:samples @sampler)))
+        new-sample-field (JTextField.)
+        fwd-button (JButton. "Forward")
+        bck-button (JButton. "Back")
+        new-button (JButton. "Add")
+        del-button (JButton. "Delete")]
+    (.addActionListener
+     fwd-button
+     (reify ActionListener
+       (actionPerformed
+           [_ evt]
+         (.setText first-sample-label (fwd-and-get-first))
+         )))
+    (.addActionListener
+     bck-button
+     (reify ActionListener
+       (actionPerformed
+           [_ evt]
+         (.setText first-sample-label (bck-and-get-first))
+         )))
+    (.addActionListener
+     new-button
+     (reify ActionListener
+       (actionPerformed
+           [_ evt]
+         (add-sample (.getText new-sample-field))
+         )))
+    (.addActionListener
+     del-button
+     (reify ActionListener
+       (actionPerformed
+           [_ evt]
+         (.setText first-sample-label (del-and-get-first)))))
+    (doto frame
+      (.setLayout (GridLayout. 2 2 3 3))
+      (.add first-sample-label)
+      (.add fwd-button)
+      (.add bck-button)
+      (.add new-sample-field)
+      (.add new-button)
+      (.add del-button)
+      (.setSize 300 80)
+      (.setVisible true)
+      )))
 
-(defn print-time []
-  (eternal-printer))
 
-(print-time)
 
-(defn unrun []
-  (if (> (time-diff (:start-time @sampler)) 10000)
-    (swap! clock assoc :running? false)
-    (str "stuff printed yay")))
 
-(> (time-diff (:start-time @sampler)) 10000)
 
-(unrun)
 
-(repeatedly 10 unrun)
 
-(run-clock)
-
-(deref clock)
-
-(start-time)
 
 
 

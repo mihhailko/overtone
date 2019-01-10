@@ -1,44 +1,19 @@
 (ns overtone.dastgah.core
   (:use [seesaw core tree keymap])
-  (:import [java.io File]
-           [javax.swing.filechooser FileSystemView])
-  (:require [overtone.dastgah.dastgah :as d]))
+  (:import [java.io File])
+  (:require [overtone.dastgah.dastgah :as d]
+            [overtone.dastgah.sampler :as s]))
 
-(def tree-model
-  (simple-tree-model
-   #(.isDirectory %)
-   (fn [f] (filter #(.isDirectory %) (.listFiles f)))
-   (File. "/")))
+(def data (atom {:slength 20
+                 :snarlength 30}))
 
-(def chooser (javax.swing.JFileChooser.))
-
-(defn render-file-item [renderer {:keys [value]}]
-  (config! renderer
-           :text (.getName value)
-           :icon (.getIcon chooser value)))
-
-(defn make-frame []
-  (frame :title "File Explorer" :width 600 :height 500
-		 :on-close :dispose
-         :content
-         (border-panel :border 5 :hgap 5 :vgap 5
-                       :north (label :id :current-dir :text "Location")
-                       :center (left-right-split
-                                (scrollable (tree
-                                             :id :tree
-                                             :model tree-model
-                                             :renderer render-file-item))
-                                (scrollable (listbox
-                                             :id :list
-                                             :renderer render-file-item))
-                                :divider-location 1/3)
-                       :south (label :id :status :text "Ready"))))
+(def state (atom {:running? true}))
 
 (def synth-keys ["Q" "W" "E" "R" "T" "Y"])
 
 (def nar-synth-keys ["A" "S" "D" "F" "G" "H"])
 
-(def f (make-frame))
+(def f (s/ui))
 
 (def freq-opts {:q 100 :w 300 :e 400 :r 500 :t 700 :y 800
                 :a 200 :s 300 :d 500 :f 700 :g 900 :h 1000})
@@ -68,7 +43,6 @@
       (recur (rest stuff))
       (println "done"))))
 
-
 (defn broad-sample [interval]
   (future
     (broad-synth)
@@ -81,22 +55,12 @@
     (Thread/sleep interval)
     (d/kill nar-synth)))
 
-
-(defn samplfn [n]
-  n)
-
-(def samples-old (atom [(samplfn "1") (samplfn "2")]))
-
 (def samples (atom [250 400 600]))
 
 (defn next-sample [samples]
   (reset! samples (take (count @samples) (rest (cycle @samples)))))
 
 (def stf (atom [1 2 3 4]))
-
-(def state (atom {:running? true}))
-
-(apply max @samples)
 
 (defn stuff [samples times]
   (future
@@ -120,11 +84,22 @@
         (recur (dec t))
         (println "done")))))
 
-(defn run-sampler [e] (stuff samples 20))
+(defn stopwatch [times]
+  (future
+    (loop [t times]
+      (println "another second...")
+      (Thread/sleep 1000)
+      (if (> t 1)
+        (recur (dec t))
+        (println "done")))))
+
+;;(stopwatch 60)
+
+(defn run-sampler [e] (stuff samples (:slength @data)))
 
 (def other-samples (atom [350 420 600 210]))
 
-(defn run-another-sampler [e] (nar-stuff other-samples 30))
+(defn run-another-sampler [e] (nar-stuff other-samples (:snarlength @data)))
 
 (map-key f "1" start-broad)
 
@@ -145,7 +120,7 @@
     pack!
     show!))
 
-(-main)
+;;(-main)
 
 
 
